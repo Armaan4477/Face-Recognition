@@ -19,7 +19,6 @@ class DatabaseManager:
             date = now.strftime('%Y-%m-%d')
             time = now.strftime('%H:%M:%S')
             
-            # Check if attendance already marked for today
             today_attendance = df[(df['Name'] == name) & (df['Date'] == date)]
             if len(today_attendance) == 0:
                 new_row = pd.DataFrame([{
@@ -27,7 +26,6 @@ class DatabaseManager:
                     'Date': date,
                     'Time': time
                 }])
-                # Use concat instead of append
                 df = pd.concat([df, new_row], ignore_index=True)
                 df.to_csv(self.attendance_file, index=False)
                 return True
