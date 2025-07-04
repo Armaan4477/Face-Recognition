@@ -31,8 +31,8 @@ jobs:
           --add-data "face_detector.py:." \
           --add-data "constant.py:." \
           --add-data "loges.py:." \
-          --icon="Info.plist" \
-          --plist="Info.plist" \
+          --osx-bundle-identifier="com.facerecog.app" \
+          --info-plist="Info.plist" \
           main.py
 
       - name: Install create-dmg
@@ -79,8 +79,8 @@ jobs:
           --add-data "face_detector.py:." \
           --add-data "constant.py:." \
           --add-data "loges.py:." \
-          --icon="Info.plist" \
-          --plist="Info.plist" \
+          --osx-bundle-identifier="com.facerecog.app" \
+          --info-plist="Info.plist" \
           main.py
 
       - name: Install create-dmg
