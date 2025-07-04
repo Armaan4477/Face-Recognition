@@ -8,10 +8,20 @@ class DatabaseManager:
         self.storage_path = storage_path or os.getcwd()
         self.attendance_file = os.path.join(self.storage_path, "attendance.csv")
         logger.info(f"Database manager initialized with storage path: {self.storage_path}")
+        
+        self.logged_attendance_today = set()
+        self.current_date = datetime.now().strftime('%Y-%m-%d')
+        
         self.initialize_attendance_file()
 
+    def _check_and_update_date(self):
+        """Check if date has changed and reset logged attendance tracking"""
+        current_date = datetime.now().strftime('%Y-%m-%d')
+        if current_date != self.current_date:
+            self.current_date = current_date
+            self.logged_attendance_today.clear()
+
     def initialize_attendance_file(self):
-        # Ensure the directory exists
         os.makedirs(self.storage_path, exist_ok=True)
         logger.info(f"Ensured storage directory exists: {self.storage_path}")
         
@@ -24,6 +34,8 @@ class DatabaseManager:
 
     def mark_attendance(self, name):
         try:
+            self._check_and_update_date()
+            
             df = pd.read_csv(self.attendance_file)
             now = datetime.now()
             date = now.strftime('%Y-%m-%d')
@@ -41,7 +53,9 @@ class DatabaseManager:
                 logger.info(f"Attendance marked for {name} at {date} {time}")
                 return True
             else:
-                logger.info(f"Attendance already marked for {name} today")
+                if name not in self.logged_attendance_today:
+                    logger.info(f"Attendance already marked for {name} today")
+                    self.logged_attendance_today.add(name)
                 return False
         except Exception as e:
             logger.error(f"Error marking attendance: {str(e)}")

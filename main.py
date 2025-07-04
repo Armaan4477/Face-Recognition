@@ -14,7 +14,6 @@ import os
 def get_resource_path(relative_path):
     """Get absolute path to resource, works for dev and for PyInstaller"""
     if hasattr(sys, '_MEIPASS'):
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
         return os.path.join(sys._MEIPASS, relative_path)
     return os.path.join(os.path.abspath("."), relative_path)
 
@@ -25,7 +24,6 @@ class MainWindow(QMainWindow):
         self.setFixedSize(900, 600)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
-        # Initialize config manager first
         self.config_manager = ConfigManager()
         self.config_manager.config_ready.connect(self.on_config_ready)
         self.config_manager.config_updated.connect(self.on_config_updated)
@@ -37,7 +35,6 @@ class MainWindow(QMainWindow):
         
         self.setup_ui()
         
-        # Start config loading
         self.config_manager.start()
 
     def setup_ui(self):
@@ -47,7 +44,6 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(central_widget)
         layout = QVBoxLayout(central_widget)
 
-        # Storage location section
         storage_layout = QHBoxLayout()
         self.storage_label = QLabel("Storage Location: Loading...")
         self.storage_label.setStyleSheet("QLabel { font-size: 12px; }")
@@ -104,7 +100,6 @@ class MainWindow(QMainWindow):
         logger.info("Configuration updated")
         self.update_storage_display()
         
-        # Reinitialize components with new paths
         if self.face_detector and self.db_manager:
             logger.info("Reinitializing components with new storage path")
             self.initialize_components()
@@ -132,15 +127,13 @@ class MainWindow(QMainWindow):
             
             self.update_storage_display()
             
-            # Initialize camera
             if self.capture is None:
                 self.capture = cv2.VideoCapture(0)
                 self.timer = QTimer()
                 self.timer.timeout.connect(self.update_frame)
                 self.timer.start(30)
                 logger.info("Camera initialized successfully")
-            
-            # Enable UI elements
+
             self.register_btn.setEnabled(True)
             self.mark_attendance_btn.setEnabled(True)
             self.change_location_btn.setEnabled(True)

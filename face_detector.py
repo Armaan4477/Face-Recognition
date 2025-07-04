@@ -9,7 +9,6 @@ from loges import logger
 def get_resource_path(relative_path):
     """Get absolute path to resource, works for dev and for PyInstaller"""
     if hasattr(sys, '_MEIPASS'):
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
         return os.path.join(sys._MEIPASS, relative_path)
     return os.path.join(os.path.abspath("."), relative_path)
 
@@ -24,9 +23,11 @@ class FaceDetector:
         self.face_locations = []
         self.face_encodings = []
         
+        self.logged_faces_today = set()
+        self.current_date = datetime.now().strftime('%Y-%m-%d')
+        
         self.detector = dlib.get_frontal_face_detector()
         
-        # Use resource path for models
         predictor_path = get_resource_path("models/shape_predictor_68_face_landmarks.dat")
         recognition_model_path = get_resource_path("models/dlib_face_recognition_resnet_model_v1.dat")
         
@@ -39,6 +40,14 @@ class FaceDetector:
         self.load_known_faces()
         self.current_frame = None
         self.current_face_coords = None
+
+    def _check_and_update_date(self):
+        """Check if date has changed and reset logged faces tracking"""
+        current_date = datetime.now().strftime('%Y-%m-%d')
+        if current_date != self.current_date:
+            self.current_date = current_date
+            self.logged_faces_today.clear()
+            logger.info("Date changed, reset logged faces tracking")
 
     def load_known_faces(self):
         if not os.path.exists(self.faces_dir):
@@ -152,6 +161,8 @@ class FaceDetector:
 
     def recognize_face(self, frame, db_manager):
         try:
+            self._check_and_update_date()
+            
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             faces = self.detector(gray)
             
@@ -181,8 +192,11 @@ class FaceDetector:
                             cv2.rectangle(frame, (x, y+h-35), (x+w, y+h), (0, 255, 0), cv2.FILLED)
                             cv2.putText(frame, f"{name} - Marked! ({confidence:.1f}%)", 
                                       (x + 6, y+h - 6), cv2.FONT_HERSHEY_DUPLEX, 0.6, (255, 255, 255), 1)
+                            self.logged_faces_today.add(name)
                         else:
-                            logger.debug(f"Face recognized but attendance already marked: {name}")
+                            if name not in self.logged_faces_today:
+                                logger.debug(f"Face recognized but attendance already marked: {name}")
+                                self.logged_faces_today.add(name)
                     else:
                         logger.debug(f"Unknown face detected (distance: {min_distance:.3f})")
                         cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 0, 255), 2)

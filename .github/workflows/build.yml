@@ -31,6 +31,8 @@ jobs:
           --add-data "face_detector.py:." \
           --add-data "constant.py:." \
           --add-data "loges.py:." \
+          --icon="Info.plist" \
+          --plist="Info.plist" \
           main.py
 
       - name: Install create-dmg
@@ -77,6 +79,8 @@ jobs:
           --add-data "face_detector.py:." \
           --add-data "constant.py:." \
           --add-data "loges.py:." \
+          --icon="Info.plist" \
+          --plist="Info.plist" \
           main.py
 
       - name: Install create-dmg
@@ -128,7 +132,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Face-Recog(linux x64)
-          path: Face-Recog\(linux\ x64\)
+          path: dist/Face-Recog\(linux\ x64\)
 
   build-linux-arm:
     runs-on: ubuntu-24.04-arm
@@ -158,7 +162,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Face-Recog(linux arm)
-          path: Face-Recog\(linux\ arm\)
+          path: dist/Face-Recog\(linux\ arm\)
 
   build-windows-x64:
     runs-on: windows-latest
