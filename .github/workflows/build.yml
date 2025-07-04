@@ -26,9 +26,11 @@ jobs:
         run: |
           pyinstaller --windowed \
           --name="Face-Recog" \
-          --add-data "models/*:models" \
+          --add-data "models:models" \
           --add-data "database_manager.py:." \
           --add-data "face_detector.py:." \
+          --add-data "constant.py:." \
+          --add-data "loges.py:." \
           main.py
 
       - name: Install create-dmg
@@ -70,9 +72,11 @@ jobs:
         run: |
           pyinstaller --windowed \
           --name="Face-Recog" \
-          --add-data "models/*:models" \
+          --add-data "models:models" \
           --add-data "database_manager.py:." \
           --add-data "face_detector.py:." \
+          --add-data "constant.py:." \
+          --add-data "loges.py:." \
           main.py
 
       - name: Install create-dmg
@@ -117,8 +121,7 @@ jobs:
 
       - name: Build for Linux x64
         run: |
-          cd Desktop-app
-          pyinstaller --onefile --clean --add-data "./models:models" --add-data "database_manager.py:." --add-data "face_detector.py:." --name=Face-Recog main.py
+          pyinstaller --onefile --clean --add-data "models:models" --add-data "database_manager.py:." --add-data "face_detector.py:." --add-data "constant.py:." --add-data "loges.py:." --name=Face-Recog main.py
           mv dist/Face-Recog "../Face-Recog(linux x64)"
 
       - name: Upload Linux x64 artifact
@@ -148,8 +151,7 @@ jobs:
 
       - name: Build for Linux arm
         run: |
-          cd Desktop-app
-          pyinstaller --onefile --clean --add-data "./models:models" --add-data "database_manager.py:." --add-data "face_detector.py:." --name=Face-Recog main.py
+          pyinstaller --onefile --clean --add-data "models:models" --add-data "database_manager.py:." --add-data "face_detector.py:." --add-data "constant.py:." --add-data "loges.py:." --name=Face-Recog main.py
           mv dist/Face-Recog "../Face-Recog(linux arm)"
 
       - name: Upload Linux arm artifact
@@ -179,12 +181,10 @@ jobs:
 
       - name: Build for Windows x64
         run: |
-          cd Desktop-app
-          & pyinstaller --onefile --windowed --uac-admin --name="Face-Recog" --add-data "models/*;models" --add-data "database_manager.py;." --add-data "face_detector.py;." main.py
+          & pyinstaller --onefile --windowed --uac-admin --name="Face-Recog" --add-data "models;models" --add-data "database_manager.py;." --add-data "face_detector.py;." --add-data "constant.py;." --add-data "loges.py;." main.py
 
       - name: Rename Windows executable
         run: |
-          cd Desktop-app
           Rename-Item -Path "dist\Face-Recog.exe" -NewName "Face-Recog(windows x64).exe"
 
       - name: Upload Windows Installer
