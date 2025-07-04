@@ -1,0 +1,194 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+      - test
+
+
+jobs:
+  build-macos-x64:
+    runs-on: macos-13
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          pip3 install -r requirements.txt
+
+      - name: Setup models
+        run: |
+          python3 setup_models.py
+
+      - name: Build for macOS
+        run: |
+          pyinstaller --windowed \
+          --name="Face-Recog" \
+          --add-data "models/*:models" \
+          --add-data "database_manager.py:." \
+          --add-data "face_detector.py:." \
+          main.py
+
+      - name: Install create-dmg
+        run: brew install create-dmg
+
+      - name: Create DMG
+        run: |
+          cd dist
+          create-dmg \
+            --volname "Face-Recog" \
+            --window-pos 200 120 \
+            --window-size 400 400 \
+            --app-drop-link 300 150 \
+            --no-internet-enable \
+            "Face-Recog(macos x64).dmg" \
+            "Face-Recog.app"
+
+      - name: Upload macOS DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: Face-Recog-macOS-x64
+          path: dist/Face-Recog(macos x64).dmg
+
+  build-macos-arm:
+    runs-on: macos-15
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          pip3 install -r requirements.txt --break-system-packages
+
+      - name: Setup models
+        run: |
+          python3 setup_models.py
+
+      - name: Build for macOS
+        run: |
+          pyinstaller --windowed \
+          --name="Face-Recog" \
+          --add-data "models/*:models" \
+          --add-data "database_manager.py:." \
+          --add-data "face_detector.py:." \
+          main.py
+
+      - name: Install create-dmg
+        run: brew install create-dmg
+
+      - name: Create DMG
+        run: |
+          cd dist
+          create-dmg \
+            --volname "Face-Recog" \
+            --window-pos 200 120 \
+            --window-size 400 400 \
+            --app-drop-link 300 150 \
+            --no-internet-enable \
+            "Face-Recog(macos arm).dmg" \
+            "Face-Recog.app"
+
+      - name: Upload macOS DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: Face-Recog-macOS-arm
+          path: dist/Face-Recog(macos arm).dmg
+     
+  build-linux-x64:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Setup models
+        run: |
+          python setup_models.py
+
+      - name: Build for Linux x64
+        run: |
+          cd Desktop-app
+          pyinstaller --onefile --clean --add-data "./models:models" --add-data "database_manager.py:." --add-data "face_detector.py:." --name=Face-Recog main.py
+          mv dist/Face-Recog "../Face-Recog(linux x64)"
+
+      - name: Upload Linux x64 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Face-Recog(linux x64)
+          path: Face-Recog\(linux\ x64\)
+
+  build-linux-arm:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Setup models
+        run: |
+          python setup_models.py
+
+      - name: Build for Linux arm
+        run: |
+          cd Desktop-app
+          pyinstaller --onefile --clean --add-data "./models:models" --add-data "database_manager.py:." --add-data "face_detector.py:." --name=Face-Recog main.py
+          mv dist/Face-Recog "../Face-Recog(linux arm)"
+
+      - name: Upload Linux arm artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Face-Recog(linux arm)
+          path: Face-Recog\(linux\ arm\)
+
+  build-windows-x64:
+    runs-on: windows-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Setup models
+        run: |
+          python setup_models.py
+
+      - name: Build for Windows x64
+        run: |
+          cd Desktop-app
+          & pyinstaller --onefile --windowed --uac-admin --name="Face-Recog" --add-data "models/*;models" --add-data "database_manager.py;." --add-data "face_detector.py;." main.py
+
+      - name: Rename Windows executable
+        run: |
+          cd Desktop-app
+          Rename-Item -Path "dist\Face-Recog.exe" -NewName "Face-Recog(windows x64).exe"
+
+      - name: Upload Windows Installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: Face-Recog(windows x64)
+          path: dist/Face-Recog(windows x64).exe
